@@ -91,6 +91,15 @@ const optimize = async () => {
             2
           )} USDC) on ${chain} not worth a withdrawal.`
         );
+      } else if (
+        chain.toUpperCase() === bestChain.toUpperCase() &&
+        ID === bestID
+      ) {
+        console.log(
+          `Position (${Number(balance).toFixed(
+            2
+          )} USDC) on ${chain}) is optimal.`
+        );
       }
     }
     // console.log("--------------");
