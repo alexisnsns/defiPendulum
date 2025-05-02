@@ -9,7 +9,7 @@ def log_msg(msg):
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_PATH, 'a') as f:
+    with open(LOG_PATH, 'w') as f:
         f.write(f"[{timestamp}] {msg}\n")
 
 load_dotenv()

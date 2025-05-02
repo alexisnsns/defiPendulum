@@ -277,13 +277,13 @@ export async function buildAccrossCallData(
   const diffPercentage = Number(diff) / Number(depositAmount);
 
   if (diffPercentage > 0.005) {
-    console.warn("⚠️ Bridge slippage is more than 0.5% — aborting");
+    console.log("⚠️ Bridge slippage is more than 0.5% — aborting");
     return;
   } else {
     console.log(
-      "Bridge slippage is within acceptable limits:",
-      diffPercentage?.toFixed(6),
-      "%; proceeding with L2 bridge tx."
+      "Bridge slippage ok;",
+      diffPercentage?.toFixed(4),
+      "%; proceeding."
     );
   }
 

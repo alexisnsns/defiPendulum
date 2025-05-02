@@ -107,7 +107,7 @@ const optimize = async () => {
     const userBalances = await getUserUSDCBalance();
     for (const [chain, balance] of Object.entries(userBalances)) {
       if (Number(balance) > 0.1) {
-        console.log(`${chain}: ${balance} undeployed USDC`);
+        console.log(`${chain}: ${Number(balance).toFixed(2)} undeployed USDC`);
       }
     }
 
