@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Navigate to the project directory
 cd /home/ec2-user/defiPendulum
 
-# Ensure that node_modules is accessible
 export PATH=$PATH:/home/ec2-user/defiPendulum/node_modules/.bin
 
 # Log the current time and script execution (this will overwrite the log file)

@@ -3,29 +3,24 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 
-# Log file path
 LOG_PATH = "/home/ec2-user/defiPendulum/pendulum/twitterBot.log"
 
 def log_msg(msg):
-    # Make sure the log directory exists
     os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
     
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(LOG_PATH, 'a') as f:
         f.write(f"[{timestamp}] {msg}\n")
 
-# Load environment variables from .env file
 load_dotenv()
 
 log_msg("Loaded environment variables.")
 
-# Retrieve API credentials from environment variables
 API_KEY = os.getenv('API_KEY')
 API_SECRET_KEY = os.getenv('API_SECRET_KEY')
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 ACCESS_TOKEN_SECRET = os.getenv('ACCESS_TOKEN_SECRET')
 
-# Authenticate with Twitter API v1.1 and v2
 def get_twitter_conn_v1(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_SECRET) -> tweepy.API:
     auth = tweepy.OAuth1UserHandler(API_KEY, API_SECRET_KEY)
     auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
