@@ -1,0 +1,20 @@
+{
+  "name": "defipendulum",
+  "private": true,
+  "scripts": {
+    "defiPendulum": "node --import ./register-ts-node.mjs pendulum/defiPendulum.ts",
+    "test": "node --import ./register-ts-node.mjs utils/test.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.799.0",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.8.3",
+    "bignumber.js": "^9.1.2",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.13.5",
+    "node-fetch": "^3.3.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  },
+  "type": "module"
+}
