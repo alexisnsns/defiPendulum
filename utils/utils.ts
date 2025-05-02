@@ -359,9 +359,9 @@ export async function approveUSDCSpending(
       }
     );
 
-    console.log("Approval transaction submitted.");
+    // console.log("Approval transaction submitted.");
     await approveTx.wait();
-    console.log("Approval transaction receipt received.");
+    // console.log("Approval transaction receipt received.");
   } catch (error) {
     console.error("Error approving USDC:", error);
   }

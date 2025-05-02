@@ -101,7 +101,7 @@ export async function depositUSDCToFluidMorphoCrossChain(
     await depositTx.wait();
     console.log(
       "CrossChain tx:",
-      amountToDeposit,
+      Number(amountToDeposit).toFixed(2),
       "USDC from",
       inputChain,
       "to",
@@ -163,11 +163,16 @@ export async function depositUSDCToFluidMorphoSingleChain(
       _PROVIDER
     );
 
-    console.log("Sending transaction...");
+    // console.log("Sending transaction...");
     const depositTx = await _SIGNER.sendTransaction(txObject);
     await depositTx.wait();
     // console.log("Single Chain Deposit transaction receipt received.");
-    console.log("SingleChain tx:", amountToDeposit, "USDC on", chainName);
+    console.log(
+      "SingleChain tx:",
+      Number(amountToDeposit).toFixed(2),
+      "USDC on",
+      chainName
+    );
   } catch (error) {
     console.error("Error in single chain deposit process:", error);
   }
