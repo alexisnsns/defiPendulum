@@ -16,5 +16,5 @@ Feel free to take whatever you want (autopilot bot / twitter bot) and iterate (e
 
 To make it work locally:
 
-- Just put the seedphrase in a .env at the root of the project, along with your subgraph key (to fetch the yields in real time from the graph)
+- Just put the seedphrase in a .env at the root of the project
 - run npm install then 'npm run defiPendulum' in your terminal (this will run the autopilot bot, not the twitter bot, which prints the logs written on an AWS EC2 instance)
