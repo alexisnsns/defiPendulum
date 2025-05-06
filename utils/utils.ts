@@ -463,7 +463,12 @@ export async function generateSingleChainDepositCallDataAngle(amount: bigint) {
   return callData;
 }
 
-export async function generateMintUSDACallDataAngle(amountIn: bigint, minAmountOut: bigint, tokenIn: string, tokenOut: string, ) {
+export async function generateMintUSDACallDataAngle(
+  amountIn: bigint,
+  minAmountOut: bigint,
+  tokenIn: string,
+  tokenOut: string
+) {
   const userAddress = await BASE_WALLET.getAddress();
 
   const mintUSDA = [
@@ -472,9 +477,223 @@ export async function generateMintUSDACallDataAngle(amountIn: bigint, minAmountO
 
   const defiInterface = new ethers.Interface(mintUSDA);
 
-  const args = [amountIn, minAmountOut, tokenIn, tokenOut, userAddress, '0x0'];
+  const args = [amountIn, minAmountOut, tokenIn, tokenOut, userAddress, "0x0"];
 
   const callData = defiInterface.encodeFunctionData("swapExactInput", args);
   console.log("callData", callData);
   return callData;
+}
+
+export function generateAccrossCallDataAngle(
+  userAddress: string,
+  transmitterAddress: string,
+  depositAmount: bigint,
+  minOut: bigint,
+  depositCurrency: string
+) {
+  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+  const MULTICALL_HANDLER_ADDRESS =
+    "0x924a9f036260DdD5808007E1AA95f08eD08aA569";
+
+  // approve USDC
+  const approveFunction = "function approve(address spender, uint256 value)";
+
+  const erc20Interface = new ethers.Interface([approveFunction]);
+
+  const mintUSDA = [
+    "function swapExactInput( uint256 amountIn, uint256 amountOutMin, address tokenIn, address tokenOut, address to, uint256 deadline)",
+  ];
+  const mintUSDAInterface = new ethers.Interface(mintUSDA);
+
+  const approveCalldata = erc20Interface.encodeFunctionData("approve", [
+    transmitterAddress,
+    depositAmount,
+  ]);
+
+  const MAX_UINT256 = ethers.MaxUint256;
+
+  const approveUSDACalldata = erc20Interface.encodeFunctionData("approve", [
+    // stUSD contract, pass as param
+    "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776",
+    MAX_UINT256,
+  ]);
+
+  const swapCallData = mintUSDAInterface.encodeFunctionData("swapExactInput", [
+    depositAmount,
+    minOut,
+    depositCurrency,
+    // TODO: pass as param
+    "0x0000206329b97DB379d5E1Bf586BbDB969C63274",
+    // mint to Accross to be able to deposit afterwards
+    MULTICALL_HANDLER_ADDRESS,
+    "0x0",
+  ]);
+
+  const depositAngleABI = [
+    "function deposit(uint256 assets, address receiver) public override returns (uint256 shares)",
+  ];
+
+  const stusdInterface = new ethers.Interface(depositAngleABI);
+
+  const _minAmount = ethers.parseUnits('0.1', 18) ;
+
+  console.log("minAmount", _minAmount);
+  const depositCallData = stusdInterface.encodeFunctionData("deposit", [
+    _minAmount,
+    userAddress,
+  ]);
+
+  const instructions = [
+    // 1/ approve usdc spending from transmitter (on usdc contract)
+    {
+      target: depositCurrency,
+      callData: approveCalldata,
+      value: 0,
+    },
+    // 2/swapExactInput (on transmitter contract)
+    {
+      target: transmitterAddress,
+      callData: swapCallData,
+      value: 0,
+    },
+    // 3/approve usda spending from stUSD contract (on usda contract)
+    {
+      target: "0x0000206329b97DB379d5E1Bf586BbDB969C63274",
+      callData: approveUSDACalldata,
+      value: 0,
+    },
+    // // 4/ mint stUSD (on stUSD contract)
+    {
+      target: "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776",
+      callData: depositCallData,
+      value: 0,
+    },
+  ];
+
+  return abiCoder.encode(
+    [
+      "tuple(tuple(address target, bytes callData, uint256 value)[] calls, address fallbackRecipient)",
+    ],
+    [
+      {
+        calls: instructions,
+        fallbackRecipient: userAddress,
+      },
+    ]
+  );
+}
+// HERE
+
+export async function buildBridgeDepositLogicAngle(
+  userAddress: string,
+  depositAmount: bigint,
+  minOut: bigint,
+  inputToken: string,
+  inputChainID: number,
+  outputToken: string,
+  outputChainID: number,
+  outputPoolAddress: string,
+) {
+  const initialMessage = generateAccrossCallDataAngle(
+    userAddress,
+    outputPoolAddress,
+    depositAmount,
+    minOut,
+    inputToken
+  );
+
+  console.log("initial message OK");
+
+  const suggestedFees = await getAccrossSuggestedFees(
+    inputToken,
+    outputToken,
+    depositAmount,
+    outputChainID,
+    inputChainID,
+    MULTICALL_HANDLER_ADDRESS,
+    initialMessage
+  );
+
+  console.log("Suggested fees received OK");
+  const outputAmount =
+    depositAmount - ethers.toBigInt(suggestedFees.relayFeeTotal);
+
+  // Generate the final message with the output amount
+  const finalMessage = generateAccrossCallDataAngle(
+    userAddress,
+    outputPoolAddress,
+    outputAmount,
+    minOut,
+    outputToken
+  );
+  return { finalMessage, outputAmount };
+}
+
+export async function buildAngleAccrossCallData(
+  depositAmount: bigint,
+  minAmount: bigint,
+  inputToken: string,
+  inputChainID: number,
+  outputToken: string,
+  outputChainID: number,
+  outputPoolAddress: string
+) {
+  // address is the same for all chains
+  const userAddress = await BASE_WALLET.getAddress();
+
+  const { finalMessage, outputAmount } = await buildBridgeDepositLogicAngle(
+    userAddress,
+    depositAmount,
+    minAmount,
+    inputToken,
+    inputChainID,
+    outputToken,
+    outputChainID,
+    outputPoolAddress
+  );
+
+  const currentTime = Math.floor(Date.now() / 1000);
+
+  // Use ethers.AbiCoder directly for precise control over encoding
+  const abiCoder = ethers.AbiCoder.defaultAbiCoder();
+
+  const encodedParams = abiCoder.encode(
+    [
+      "address",
+      "address",
+      "address",
+      "address",
+      "uint256",
+      "uint256",
+      "uint256",
+      "address",
+      "uint32",
+      "uint32",
+      "uint32",
+      "bytes",
+    ],
+    [
+      userAddress, // depositor (user address)
+      MULTICALL_HANDLER_ADDRESS, // recipient (multicall handler)
+      inputToken, // inputToken
+      outputToken, // outputToken
+      depositAmount, // inputAmount
+      outputAmount, // outputAmount
+      ethers.getBigInt(outputChainID), // destinationChainId
+      ethers.ZeroAddress, // exclusiveRelayer (none)
+      currentTime, // quoteTimestamp
+      currentTime + 7200, // fillDeadline (2 hours from now)
+      0, // exclusivityDeadline (none)
+      finalMessage, // message
+    ]
+  );
+
+  // Manually construct the data with the correct function selector
+  let manualData = DEPOSIT_V3_SELECTOR + encodedParams.substring(2); // Remove '0x' from params
+
+  // Append the unique identifier to the calldata (required by Across)
+  const finalData =
+    "0x" + manualData.substring(2) + DELIMITER + UNIQUE_IDENTIFIER;
+
+  return finalData;
 }

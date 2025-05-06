@@ -5,7 +5,9 @@
     "defiPendulum": "node --import ./register-ts-node.mjs pendulum/defiPendulum.ts",
     "test": "node --import ./register-ts-node.mjs utils/test.ts",
     "dangle": "node --import ./register-ts-node.mjs angle/depositAngle.ts",
-    "wangle": "node --import ./register-ts-node.mjs angle/withdrawAngle.ts"
+    "wangle": "node --import ./register-ts-node.mjs angle/withdrawAngle.ts",
+    "cangle": "node --import ./register-ts-node.mjs angle/crossDepositAngle.ts"
+
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.799.0",
