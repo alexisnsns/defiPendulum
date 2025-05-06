@@ -49,7 +49,7 @@ export async function depositAngleCrossChain(
   try {
     const depositAmount = ethers.parseUnits(amountToDeposit, USDC_DECIMALS);
 
-    const minOut = (Number(amountToDeposit) * 0.9).toString();
+    const minOut = (Number(amountToDeposit) * 0.99).toString();
     const _minAmount = ethers.parseUnits(minOut, 18);
 
     // 1/ Approve USDC to be spent by ACCROSS Contract

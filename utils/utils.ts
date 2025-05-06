@@ -535,11 +535,9 @@ export function generateAccrossCallDataAngle(
 
   const stusdInterface = new ethers.Interface(depositAngleABI);
 
-  const _minAmount = ethers.parseUnits('0.1', 18) ;
 
-  console.log("minAmount", _minAmount);
   const depositCallData = stusdInterface.encodeFunctionData("deposit", [
-    _minAmount,
+    minOut,
     userAddress,
   ]);
 
