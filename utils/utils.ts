@@ -30,6 +30,7 @@ export async function generateSingleChainDepositCallDataAave(
   const callData = defiInterface.encodeFunctionData("supply", args);
   return callData;
 }
+
 export async function generateSingleChainDepositCallDataFluid(amount: bigint) {
   const userAddress = await BASE_WALLET.getAddress();
 
@@ -444,4 +445,36 @@ export async function generateWithdrawCallDataFluid(withdrawAmount: bigint) {
   ]);
 
   return withdrawCalldata;
+}
+
+export async function generateSingleChainDepositCallDataAngle(amount: bigint) {
+  const userAddress = await BASE_WALLET.getAddress();
+
+  const supplyAngleABI = [
+    "function deposit(uint256 assets, address receiver) public override returns (uint256 shares)",
+  ];
+
+  const defiInterface = new ethers.Interface(supplyAngleABI);
+
+  const args = [amount, userAddress];
+
+  const callData = defiInterface.encodeFunctionData("deposit", args);
+  console.log("callData", callData);
+  return callData;
+}
+
+export async function generateMintUSDACallDataAngle(amountIn: bigint, minAmountOut: bigint, tokenIn: string, tokenOut: string, ) {
+  const userAddress = await BASE_WALLET.getAddress();
+
+  const mintUSDA = [
+    "function swapExactInput( uint256 amountIn, uint256 amountOutMin, address tokenIn, address tokenOut, address to, uint256 deadline)",
+  ];
+
+  const defiInterface = new ethers.Interface(mintUSDA);
+
+  const args = [amountIn, minAmountOut, tokenIn, tokenOut, userAddress, '0x0'];
+
+  const callData = defiInterface.encodeFunctionData("swapExactInput", args);
+  console.log("callData", callData);
+  return callData;
 }
