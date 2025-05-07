@@ -508,7 +508,6 @@ export function generateAccrossCallDataAngle(
     depositAmount,
   ]);
 
-  // if not ARB, then Base
   const stUSD = "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776";
   const USDA = "0x0000206329b97DB379d5E1Bf586BbDB969C63274";
 

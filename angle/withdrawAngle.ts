@@ -27,7 +27,7 @@ export async function withdrawFromAngle(
   const _SIGNER = wallets[chainName.toUpperCase()];
   const _PROVIDER = providers[chainName.toUpperCase()];
 
-  const _POOL_ADDRESS = '0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776'
+  const stUSD = "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776";
 
   try {
     const withdrawAmount = ethers.parseUnits(amountToWithdraw, 18);
@@ -46,7 +46,7 @@ export async function withdrawFromAngle(
     const txObject = await buildFinalTxObject(
       callData,
       _CHAIN_ID,
-      _POOL_ADDRESS,
+      stUSD,
       _PROVIDER
     );
 
@@ -60,4 +60,4 @@ export async function withdrawFromAngle(
   }
 }
 
-withdrawFromAngle('0.1', "ARBITRUM");
+withdrawFromAngle('1', "BASE");
