@@ -458,7 +458,7 @@ export async function generateSingleChainDepositCallDataAngle(amount: bigint) {
   const args = [amount, userAddress];
 
   const callData = defiInterface.encodeFunctionData("deposit", args);
-  console.log("callData", callData);
+  // console.log("callData", callData);
   return callData;
 }
 
@@ -479,7 +479,7 @@ export async function generateMintUSDACallDataAngle(
   const args = [amountIn, minAmountOut, tokenIn, tokenOut, userAddress, "0x0"];
 
   const callData = defiInterface.encodeFunctionData("swapExactInput", args);
-  console.log("callData", callData);
+  // console.log("callData", callData);
   return callData;
 }
 
