@@ -488,7 +488,6 @@ export function generateAccrossCallDataAngle(
   userAddress: string,
   transmitterAddress: string,
   depositAmount: bigint,
-  minOut: bigint,
   depositCurrency: string
 ) {
   const abiCoder = ethers.AbiCoder.defaultAbiCoder();
@@ -518,9 +517,12 @@ export function generateAccrossCallDataAngle(
     MAX_UINT256,
   ]);
 
+  // minAmount of USDA removes 1% for slippage and sets with 18 decimals
+  const minAmount = (depositAmount * 99n * 10n ** 12n) / 100n;
+
   const swapCallData = mintUSDAInterface.encodeFunctionData("swapExactInput", [
     depositAmount,
-    minOut,
+    minAmount,
     depositCurrency,
     // TODO: pass as param
     "0x0000206329b97DB379d5E1Bf586BbDB969C63274",
@@ -537,7 +539,7 @@ export function generateAccrossCallDataAngle(
 
 
   const depositCallData = stusdInterface.encodeFunctionData("deposit", [
-    minOut,
+    minAmount,
     userAddress,
   ]);
 
@@ -585,7 +587,6 @@ export function generateAccrossCallDataAngle(
 export async function buildBridgeDepositLogicAngle(
   userAddress: string,
   depositAmount: bigint,
-  minOut: bigint,
   inputToken: string,
   inputChainID: number,
   outputToken: string,
@@ -596,7 +597,6 @@ export async function buildBridgeDepositLogicAngle(
     userAddress,
     outputPoolAddress,
     depositAmount,
-    minOut,
     inputToken
   );
 
@@ -621,7 +621,6 @@ export async function buildBridgeDepositLogicAngle(
     userAddress,
     outputPoolAddress,
     outputAmount,
-    minOut,
     outputToken
   );
   return { finalMessage, outputAmount };
@@ -629,7 +628,6 @@ export async function buildBridgeDepositLogicAngle(
 
 export async function buildAngleAccrossCallData(
   depositAmount: bigint,
-  minAmount: bigint,
   inputToken: string,
   inputChainID: number,
   outputToken: string,
@@ -642,7 +640,6 @@ export async function buildAngleAccrossCallData(
   const { finalMessage, outputAmount } = await buildBridgeDepositLogicAngle(
     userAddress,
     depositAmount,
-    minAmount,
     inputToken,
     inputChainID,
     outputToken,

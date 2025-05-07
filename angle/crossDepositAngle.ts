@@ -49,8 +49,6 @@ export async function depositAngleCrossChain(
   try {
     const depositAmount = ethers.parseUnits(amountToDeposit, USDC_DECIMALS);
 
-    const minOut = (Number(amountToDeposit) * 0.99).toString();
-    const _minAmount = ethers.parseUnits(minOut, 18);
 
     // 1/ Approve USDC to be spent by ACCROSS Contract
     await approveUSDCSpending(
@@ -64,7 +62,6 @@ export async function depositAngleCrossChain(
 
     const finalCallData = await buildAngleAccrossCallData(
       depositAmount,
-      _minAmount,
       _INPUT_TOKEN_ADDRESS,
       _CHAIN_ID,
       OUTPUT_TOKEN_ADDRESS,
@@ -78,6 +75,7 @@ export async function depositAngleCrossChain(
       SPENDER_ADDRESS,
       _PROVIDER
     );
+
 
     console.log("Sending final transaction...");
     const depositTx = await _SIGNER.sendTransaction(txObject);
