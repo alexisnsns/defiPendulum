@@ -36,19 +36,16 @@ export async function depositAngleCrossChain(
   const _SIGNER = wallets[inputChain.toUpperCase()];
   const _PROVIDER = providers[inputChain.toUpperCase()];
 
-  const _POOL_ADDRESS = "0xC0077E921C30c39cDD8b693E25Af572C10E82a05";
+  // if not ARB, then Base
+  const angleTransmutter =
+    outputChain === "ARBITRUM"
+      ? "0xD253b62108d1831aEd298Fc2434A5A8e4E418053"
+      : "0x222222880e079445Df703c0604706E71a538Fd4f";
 
-  const stUSD = "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776";
-  const angleRouter = "0x9A33e690AA78A4c346e72f7A5e16e5d7278BE835";
-
-  const arbTransmiter = "0xD253b62108d1831aEd298Fc2434A5A8e4E418053";
-  const USDA = "0x0000206329b97DB379d5E1Bf586BbDB969C63274";
   const SPENDER_ADDRESS = SPOKEPOOL_ADDRESSES[inputChain.toUpperCase()];
-
 
   try {
     const depositAmount = ethers.parseUnits(amountToDeposit, USDC_DECIMALS);
-
 
     // 1/ Approve USDC to be spent by ACCROSS Contract
     await approveUSDCSpending(
@@ -56,8 +53,7 @@ export async function depositAngleCrossChain(
       _INPUT_TOKEN_ADDRESS,
       // Address to approve
       SPENDER_ADDRESS,
-      _SIGNER,
-      _PROVIDER
+      _SIGNER
     );
 
     const finalCallData = await buildAngleAccrossCallData(
@@ -66,7 +62,7 @@ export async function depositAngleCrossChain(
       _CHAIN_ID,
       OUTPUT_TOKEN_ADDRESS,
       OUTPUT_CHAIN_ID,
-      arbTransmiter
+      angleTransmutter
     );
 
     const txObject = await buildFinalTxObject(
@@ -75,7 +71,6 @@ export async function depositAngleCrossChain(
       SPENDER_ADDRESS,
       _PROVIDER
     );
-
 
     console.log("Sending final transaction...");
     const depositTx = await _SIGNER.sendTransaction(txObject);
@@ -92,8 +87,8 @@ export async function depositAngleCrossChain(
       inputChain
     );
   } catch (error) {
-    console.error("Error in single chain deposit process:", error);
+    console.error("Error in cross chain deposit process:", error);
   }
 }
 
-depositAngleCrossChain("1", "BASE", "ARBITRUM");
+depositAngleCrossChain("1", "ARBITRUM", "BASE");

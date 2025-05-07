@@ -76,8 +76,7 @@ export async function depositUSDCToFluidMorphoCrossChain(
       depositAmount,
       INPUT_TOKEN_ADDRESS,
       SPENDER_ADDRESS,
-      SIGNER,
-      PROVIDER
+      SIGNER
     );
 
     const finalCallData = await buildAccrossCallData(
@@ -146,8 +145,7 @@ export async function depositUSDCToFluidMorphoSingleChain(
       _INPUT_TOKEN_ADDRESS,
       // FLUID POOL ADDRESS
       _POOL_ADDRESS,
-      _SIGNER,
-      _PROVIDER
+      _SIGNER
     );
 
     const finalCallData = await generateSingleChainDepositCallDataFluid(

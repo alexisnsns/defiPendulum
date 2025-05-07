@@ -3,7 +3,11 @@ import { ethers } from "ethers";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { USDC_DECIMALS, CHAIN_IDS, USDC_ADDRESSES } from "../utils/resources.js";
+import {
+  USDC_DECIMALS,
+  CHAIN_IDS,
+  USDC_ADDRESSES,
+} from "../utils/resources.js";
 
 import {
   buildAccrossCallData,
@@ -24,12 +28,14 @@ export async function depositAngle(amountToDeposit: string, chainName: string) {
   const _SIGNER = wallets[chainName.toUpperCase()];
   const _PROVIDER = providers[chainName.toUpperCase()];
 
-  const _POOL_ADDRESS = "0xC0077E921C30c39cDD8b693E25Af572C10E82a05";
-
   const stUSD = "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776";
-  const angleRouter = "0x9A33e690AA78A4c346e72f7A5e16e5d7278BE835";
 
-  const arbTransmiter = "0xD253b62108d1831aEd298Fc2434A5A8e4E418053";
+  // if not ARB, then Base
+  const angleTransmutter =
+    chainName === "ARBITRUM"
+      ? "0xD253b62108d1831aEd298Fc2434A5A8e4E418053"
+      : "0x222222880e079445Df703c0604706E71a538Fd4f";
+
   const USDA = "0x0000206329b97DB379d5E1Bf586BbDB969C63274";
 
   try {
@@ -40,9 +46,8 @@ export async function depositAngle(amountToDeposit: string, chainName: string) {
       depositAmount,
       _INPUT_TOKEN_ADDRESS,
       // Address to approve
-      arbTransmiter,
-      _SIGNER,
-      _PROVIDER
+      angleTransmutter,
+      _SIGNER
     );
 
     // 2/ Mint USDC<>USDA on the transmitter contract
@@ -58,7 +63,7 @@ export async function depositAngle(amountToDeposit: string, chainName: string) {
     const mintTxObject = await buildFinalTxObject(
       callData,
       _CHAIN_ID,
-      arbTransmiter,
+      angleTransmutter,
       _PROVIDER
     );
 
@@ -68,7 +73,7 @@ export async function depositAngle(amountToDeposit: string, chainName: string) {
     console.log("Mint transaction receipt received.");
 
     // 3/ Approve USDA spending by the stUSD contract
-    await approveUSDCSpending(_depositAmount, USDA, stUSD, _SIGNER, _PROVIDER);
+    await approveUSDCSpending(_depositAmount, USDA, stUSD, _SIGNER);
 
     // 4/ Mint USDA<>stUSD on the stUSD contract
     const finalCallData = await generateSingleChainDepositCallDataAngle(

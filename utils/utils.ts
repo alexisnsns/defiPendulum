@@ -339,7 +339,6 @@ export async function approveUSDCSpending(
   USDCContractAddress: string,
   spenderAddress: string,
   signer: ethers.Signer,
-  provider: ethers.Provider
 ) {
   const usdcContract = new ethers.Contract(
     USDCContractAddress,
@@ -362,7 +361,7 @@ export async function approveUSDCSpending(
 
     // console.log("Approval transaction submitted.");
     await approveTx.wait();
-    // console.log("Approval transaction receipt received.");
+    console.log("Approval transaction receipt received.");
   } catch (error) {
     console.error("Error approving USDC:", error);
   }
@@ -509,11 +508,14 @@ export function generateAccrossCallDataAngle(
     depositAmount,
   ]);
 
+  // if not ARB, then Base
+  const stUSD = "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776";
+  const USDA = "0x0000206329b97DB379d5E1Bf586BbDB969C63274";
+
   const MAX_UINT256 = ethers.MaxUint256;
 
   const approveUSDACalldata = erc20Interface.encodeFunctionData("approve", [
-    // stUSD contract, pass as param
-    "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776",
+    stUSD,
     MAX_UINT256,
   ]);
 
@@ -524,8 +526,7 @@ export function generateAccrossCallDataAngle(
     depositAmount,
     minAmount,
     depositCurrency,
-    // TODO: pass as param
-    "0x0000206329b97DB379d5E1Bf586BbDB969C63274",
+    USDA,
     // mint to Accross to be able to deposit afterwards
     MULTICALL_HANDLER_ADDRESS,
     "0x0",
@@ -536,7 +537,6 @@ export function generateAccrossCallDataAngle(
   ];
 
   const stusdInterface = new ethers.Interface(depositAngleABI);
-
 
   const depositCallData = stusdInterface.encodeFunctionData("deposit", [
     minAmount,
@@ -558,13 +558,13 @@ export function generateAccrossCallDataAngle(
     },
     // 3/approve usda spending from stUSD contract (on usda contract)
     {
-      target: "0x0000206329b97DB379d5E1Bf586BbDB969C63274",
+      target: USDA,
       callData: approveUSDACalldata,
       value: 0,
     },
     // // 4/ mint stUSD (on stUSD contract)
     {
-      target: "0x0022228a2cc5E7eF0274A7Baa600d44da5aB5776",
+      target: stUSD,
       callData: depositCallData,
       value: 0,
     },
@@ -591,7 +591,7 @@ export async function buildBridgeDepositLogicAngle(
   inputChainID: number,
   outputToken: string,
   outputChainID: number,
-  outputPoolAddress: string,
+  outputPoolAddress: string
 ) {
   const initialMessage = generateAccrossCallDataAngle(
     userAddress,
